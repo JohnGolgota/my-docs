@@ -1,0 +1,8 @@
+dot_rpm = [
+	"cloudflare-warp",
+	""
+]
+
+flatpak = [
+	""
+]
