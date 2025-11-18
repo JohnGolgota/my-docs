@@ -1,0 +1,42 @@
+brew = [
+	"mysql-client",
+	"zellij",
+	"chezmoi",
+	"fzf",
+	"ttyd",
+	"yazi",
+]
+
+cargo = [
+	"starship",
+	"nushell",
+	"rg",
+	"fd",
+	"bat",
+	"bob",
+	"dua",
+	"diary", # local cosa mia
+	"eza",
+	"fnm",
+	"xcp",
+	"zoxide",
+]
+
+bob = [
+	"neovim:latest",
+]
+
+flatpak = [
+	"dbeaver-community",
+	"zen",
+	"podman desktop",
+	""
+]
+
+[[other]]
+name = "pwsh"
+method = "wiki"
+
+[[other]]
+name = "rust lang"
+method = "wiki"
