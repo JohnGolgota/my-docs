@@ -1,0 +1,55 @@
+normal = [
+    "vscode",
+    "barrier",
+    "zen",
+    "brave",
+    "jetbrains toolbox",
+    "brew",
+    "ssh access",
+    "xcode",
+    "android studio",
+]
+
+como_en_linux = [
+    "pwsh",
+    "rust lang",
+
+]
+
+brew = [
+    "ffmpeg",
+    "rg",
+    "fzf",
+    "yazi",
+    "zoxide",
+    "fd",
+    "jq",
+    "poppler",
+    "resvg",
+    "imagemagick",
+    "sevenzip",
+    "wezterm",
+    "eza",
+    "starship",
+    "fastfetch",
+    "cloudflared",
+    "chezmoi",
+    "bat",
+    "gitui",
+
+]
+
+cargo = [
+    "nushell",
+    "bob-nvim",
+]
+
+git = [
+    "git@github.com:JohnGolgota/personal-docs.git",
+    "git@github.com:JohnGolgota/dotfiles",
+]
+
+todo = [
+    "docker",
+]
+
