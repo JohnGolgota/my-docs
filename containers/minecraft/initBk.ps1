@@ -3,50 +3,88 @@ $dataPath = Join-Path $basePath "data"
 $backupPath = Join-Path $basePath "data_backups"
 
 $timeStamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-$backupFolder = Join-Path $backupPath (get-date -Format "yyyy-MM-dd") $timeStamp
+$backupFolder = Join-Path $backupPath (get-date -Format "yyyy-MM-dd")
 $backupFile = Join-Path $backupFolder "backup_$timeStamp.zip"
 
 $logFile = Join-Path $backupFolder "backup.log"
 
+# TODO: is this too much? it most certainly is!, should this be a module? maybe, but that'd mean more dependencies, so nose tu dime
+Function Write-Log
+{
+	param(
+		[string]$Message = '',
+		[ValidateSet('Info', 'Warning', 'Error', 'Success', 'Debug')]
+		[string]$Severity = 'Info'
+	)
+	Switch ($Severity)
+	{
+		'Warning' {
+			$FormattedMessage = "[WARNING] $Message"
+			Write-Host $FormattedMessage -ForegroundColor $host.PrivateData.WarningForegroundColor -BackgroundColor $host.PrivateData.WarningBackgroundColor
+		}
+		'Error' {
+			$FormattedMessage = "[ERROR] $Message"
+			Write-Host $FormattedMessage -ForegroundColor $host.PrivateData.ErrorForegroundColor -BackgroundColor $host.PrivateData.ErrorBackgroundColor
+			exit 1
+		}
+		'Debug' {
+			# Only log debug messages if debug stream shown
+			If ($DebugPreference -ine 'SilentlyContinue')
+			{
+				$FormattedMessage = "[DEBUG] $Message"
+				Write-Host $FormattedMessage -ForegroundColor $host.PrivateData.DebugForegroundColor -BackgroundColor $host.PrivateData.DebugBackgroundColor
+			}
+		}
+		Default {
+			Write-Host $Message
+		}
+	}
+}
+
 try
 {
-	New-Item -Path $backupFolder -ItemType Directory -Force
-
 	Start-Transcript -Path $logFile -Append
 
-	Write-Host "Init Backup: $(Get-Date)"
-	Write-Host "Origin: $dataPath"
-	Write-Host "Destination: $backupFile"
+	Write-Log -Message "Creating backup folder..."
+	New-Item -Path $backupFolder -ItemType Directory -Force | Out-Null
+	Write-Log -Severity Success -Message "Backup folder '$backupFolder' successfully created!"
 
-	if (-not (Test-Path $dataPath))
+	Write-Log -Message "Init backup: $( Get-Date )"
+	Write-Log -Message "Backup origin: $dataPath"
+	Write-Log -Message "Backup destination: $backupFile"
+
+	if (!(Test-Path $dataPath))
 	{
-		throw "Data path not found: $dataPath"
+		Write-Log -Severity Error -Message "Data path '$dataPath' not found"
 	}
 
-	Write-Host "Compressing data..."
+	Write-Log -Message "Compressing data..."
 	Compress-Archive -Path $dataPath -DestinationPath $backupFile -CompressionLevel Optimal
 
 	$backupSize = (Get-Item $backupFile).Length
 	$backupSizeMB = [math]::Round($backupSize / 1MB, 2)
 
-	Write-Host "Backup complete: $backupFile ($backupSizeMB MB)"
+	Write-Log -Severity Success -Message "Backup complete: $backupFile ($backupSizeMB MB)"
 
+	# TODO: Make this a parameter, with default value 5
+	$backupsToKeep = 5
 	$oldBackups = Get-ChildItem $backupPath -Recurse -Filter "*.zip" |
 		Where-Object {
-			$_.LastWriteTime -lt (Get-Date).AddDays(-5)
+			$_.LastWriteTime -lt (Get-Date).AddDays(-($backupsToKeep))
 		}
 
 	if ($oldBackups.Count -gt 0)
 	{
-		Write-Host "Delete $($oldBackups.Count) old backups..."
+		Write-Log -Severity Warning -Message "Found $( $oldBackups.Count ) backups older than $backupsToKeep days, deleting..."
 		$oldBackups | Remove-Item -Force
 	}
 
-} catch
+}
+catch
 {
-	Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
-	exit 1
-} finally
+	Write-Log -Severity Error -Message "$( $_.Exception.Message )"
+}
+finally
 {
 	Stop-Transcript
 }
