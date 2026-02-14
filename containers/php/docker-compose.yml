@@ -5,19 +5,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: web_php
     restart: always
     ports:
       - $PORT:80
     volumes:
       - ./www:/var/www/html
-    networks:
-      - cloudflared_net
 
   base_de_datos:
     image: mariadb:10.11.6-jammy
     restart: always
-    container_name: base_de_datos
     env_file:
       - .env
     environment:
@@ -30,10 +26,4 @@ services:
       - $DB_PORT:3306
     volumes:
       - ./full_db:/var/lib/mysql
-    networks:
-      - cloudflared_net
-
-networks:
-  cloudflared_net:
-    external: true
 
